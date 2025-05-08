@@ -40,6 +40,7 @@ fi
 # Make the script executable
 chmod +x "$SCRIPT_TEMP"
 
+echo "Installing the script file to system path..."
 cp "$SCRIPT_TEMP" /usr/bin/init_mi_config.sh
 chmod +x /usr/bin/init_mi_config.sh
 
