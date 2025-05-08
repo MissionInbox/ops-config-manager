@@ -144,18 +144,6 @@ if [ "$#" -eq 2 ]; then
     SCRIPT_PATH="$TEMP_SCRIPT"
   fi
 
-  echo "Installing script to $SCRIPT_DESTINATION for future use..."
-  
-  # Check if we need root permissions
-  if [[ "$SCRIPT_DESTINATION" =~ ^/usr/bin/ ]]; then
-    # We're already running as root if we got here via curl | sudo bash
-    true
-  fi
-  
-  # Copy this script to the destination
-  cp "$SCRIPT_PATH" "$SCRIPT_DESTINATION"
-  chmod +x "$SCRIPT_DESTINATION"
-  
   # Store environment and private key for future use
   echo "Storing configuration parameters..."
   mkdir -p "$(dirname "$CONFIG_PARAMS_FILE")" 2>/dev/null || true
@@ -165,9 +153,6 @@ PRIVATE_KEY=$PRIVATE_KEY
 EOF
   chmod 600 "$CONFIG_PARAMS_FILE"  # Restrict permissions - only owner can read/write
   
-  echo "✅ Script installed at $SCRIPT_DESTINATION"
   echo "✅ Configuration parameters stored at $CONFIG_PARAMS_FILE"
   echo ""
-  echo "Other repositories can now run this command to update configuration:"
-  echo "  $SCRIPT_DESTINATION"
 fi

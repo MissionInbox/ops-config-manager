@@ -44,3 +44,6 @@ echo "Installing and running the configuration script..."
 
 # Run the script to set up the configuration
 "$SCRIPT_TEMP" "$ENV" "$PRIVATE_KEY"
+cp "$SCRIPT_TEMP" /usr/bin/init_mi_config.sh
+chmod +x /usr/bin/init_mi_config.sh
+echo "Configuration script installed successfully."
