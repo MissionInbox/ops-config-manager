@@ -103,6 +103,31 @@ fi
 
 echo "✅ Configuration initialized successfully at $OUTPUT_FILE"
 
+# Extract repo_private_key if present in config
+REPO_KEY_PATH="/opt/missioninbox/repo.key"
+echo "Checking for repository private key in config..."
+
+if grep -q "repo_private_key" "$OUTPUT_FILE"; then
+  echo "Found repo_private_key in config, extracting..."
+  
+  # Extract the base64 encoded private key
+  REPO_KEY_BASE64=$(grep -o '"repo_private_key"[[:space:]]*:[[:space:]]*"[^"]*"' "$OUTPUT_FILE" | cut -d'"' -f4)
+  
+  if [ -n "$REPO_KEY_BASE64" ]; then
+    # Decode the base64 key
+    echo "$REPO_KEY_BASE64" | base64 -d > "$REPO_KEY_PATH"
+    
+    # Set secure permissions for SSH key
+    chmod 600 "$REPO_KEY_PATH"
+    
+    echo "✅ Repository private key saved to $REPO_KEY_PATH with secure permissions"
+  else
+    echo "⚠️ repo_private_key found but appears to be empty"
+  fi
+else
+  echo "No repo_private_key found in config"
+fi
+
 # Only store the script if this is the initial installation
 if [ "$#" -eq 2 ]; then
   # Get the actual script location - handle both direct execution and curl piping

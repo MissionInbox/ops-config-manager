@@ -48,26 +48,26 @@ The script automatically detects which environment's configuration to update bas
 
 ### Initializing Configuration
 
-The system uses several scripts for different purposes:
+The system uses two scripts for configuration management:
 
-1. `install.sh` - For initial setup with parameters (used once)
-2. `curl_install.sh` - For downloading and running the installation remotely
-3. `init_mi_config.sh` - Parameter-less updater script (used by other repositories)
+1. `curl_install.sh` - For downloading and running the installation remotely
+2. `init_mi_config.sh` - The main script for both initial setup and updates
 
 #### First-Time Setup
 
-To perform the initial configuration on a new server:
+To perform the initial configuration on a new server, use the `init_mi_config.sh` script:
 
 ```bash
-sudo ./install.sh staging "your_private_key"
+sudo ./init_mi_config.sh staging "your_private_key"
 ```
 
 This will:
 1. Fetch the encrypted configuration from `https://admin-api.missioninbox.com/ops/staging.config`
 2. Decrypt it using the provided private key
 3. Store the decrypted configuration at `/opt/missioninbox/environment.config`
-4. Install the `init_mi_config.sh` updater to `/usr/bin/` for future use
-5. Store the environment and private key securely for automatic updates
+4. Extract any `repo_private_key` field and save it to `/opt/missioninbox/repo.key`
+5. Install itself to `/usr/bin/init_mi_config.sh` for future use
+6. Store the environment and private key securely for automatic updates
 
 #### Quick Setup for New Developers
 
@@ -116,12 +116,22 @@ fi
 
 ## Configuration Files
 
-Create environment-specific configuration files:
+Create environment-specific configuration files in the `configs` directory:
 
-- `staging.config` - Configuration for staging environment
-- `production.config` - Configuration for production environment
+- `configs/staging.config` - Configuration for staging environment
+- `configs/production.config` - Configuration for production environment
 
-These files can contain any sensitive data that needs to be securely managed.
+These files can contain any sensitive data that needs to be securely managed, including:
+
+### Special Configuration Fields
+
+The configuration files support some special fields that receive special handling:
+
+- `repo_private_key`: A base64-encoded SSH private key that will be:
+  - Extracted from the configuration file
+  - Decoded and saved to `/opt/missioninbox/repo.key`
+  - Given proper permissions (600) for use as an SSH key
+  - This allows secure storage of deployment keys for accessing repositories
 
 ## Security Notes
 
