@@ -50,8 +50,7 @@ The script automatically detects which environment's configuration to update bas
 
 The system uses two scripts with different purposes:
 
-1. `init_config.sh` - Initial setup with parameters (used once)
-2. `init_mi_config.sh` - Parameter-less updater (used by other repositories)
+1. `init_mi_config.sh` - Initial setup with parameters
 
 #### First-Time Setup
 
@@ -73,7 +72,7 @@ This will:
 For new developers who have received the private key, you can quickly set up your environment with a single command:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/MissionInbox/ops-config-manager/refs/heads/master/init_config.sh | sudo bash -s -- staging "your_private_key"
+curl -sSL https://raw.githubusercontent.com/MissionInbox/ops-config-manager/refs/heads/master/init_mi_config.sh | sudo bash -s -- staging "your_private_key"
 ```
 
 Replace `staging` with the environment you need (`production`, etc.) and `"your_private_key"` with the actual private key you've received through secure channels.
