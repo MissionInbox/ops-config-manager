@@ -119,8 +119,9 @@ REPO_KEY_BASE64=$(jq -r '.repo_private_key // empty' "$OUTPUT_FILE")
 if [ -n "$REPO_KEY_BASE64" ]; then
   echo "Found repo_private_key in config, extracting..."
   
-  # Decode the base64 key
+  # Decode the base64 key and ensure it has a blank line at the end
   echo "$REPO_KEY_BASE64" | base64 -d > "$REPO_KEY_PATH"
+  echo "" >> "$REPO_KEY_PATH"  # Add blank line at the end
   
   # Set secure permissions for SSH key
   chmod 600 "$REPO_KEY_PATH"
