@@ -59,6 +59,23 @@ This will:
 2. Decrypt it using the provided private key
 3. Store the decrypted configuration at `/opt/missioninbox/environment.config`
 
+### Quick Setup for New Developers
+
+For new developers who have received the private key, you can quickly set up your environment with a single command:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/missioninbox/ops-config-manager/main/init_config.sh | bash -s -- staging "your_private_key"
+```
+
+Replace `staging` with the environment you need (`production`, etc.) and `"your_private_key"` with the actual private key you've received through secure channels.
+
+This command will:
+1. Download the initialization script directly from GitHub
+2. Execute it with your environment and private key
+3. Set up your environment configuration at `/opt/missioninbox/environment.config`
+
+Note: You may need to use `sudo` if you don't have write access to the `/opt/missioninbox` directory.
+
 ## Configuration Files
 
 Create environment-specific configuration files:
