@@ -48,23 +48,25 @@ The script automatically detects which environment's configuration to update bas
 
 ### Initializing Configuration
 
-The system uses two scripts with different purposes:
+The system uses several scripts for different purposes:
 
-1. `init_mi_config.sh` - Initial setup with parameters
+1. `install.sh` - For initial setup with parameters (used once)
+2. `curl_install.sh` - For downloading and running the installation remotely
+3. `init_mi_config.sh` - Parameter-less updater script (used by other repositories)
 
 #### First-Time Setup
 
 To perform the initial configuration on a new server:
 
 ```bash
-sudo ./init_mi_config.sh staging "your_private_key"
+sudo ./install.sh staging "your_private_key"
 ```
 
 This will:
 1. Fetch the encrypted configuration from `https://admin-api.missioninbox.com/ops/staging.config`
 2. Decrypt it using the provided private key
 3. Store the decrypted configuration at `/opt/missioninbox/environment.config`
-4. Install `init_mi_config.sh` to `/usr/bin/` for future use
+4. Install the `init_mi_config.sh` updater to `/usr/bin/` for future use
 5. Store the environment and private key securely for automatic updates
 
 #### Quick Setup for New Developers
@@ -72,12 +74,12 @@ This will:
 For new developers who have received the private key, you can quickly set up your environment with a single command:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/MissionInbox/ops-config-manager/refs/heads/master/init_mi_config.sh | sudo bash -s -- staging "your_private_key"
+curl -sSL https://raw.githubusercontent.com/MissionInbox/ops-config-manager/refs/heads/master/curl_install.sh | sudo bash -s -- staging "your_private_key"
 ```
 
 Replace `staging` with the environment you need (`production`, etc.) and `"your_private_key"` with the actual private key you've received through secure channels.
 
-This single command performs the complete setup process described above.
+This single command downloads and runs the installation script to perform the complete setup process.
 
 ### Integration with Other Repositories
 
