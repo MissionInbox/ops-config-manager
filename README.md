@@ -58,7 +58,7 @@ The system uses two scripts with different purposes:
 To perform the initial configuration on a new server:
 
 ```bash
-sudo ./init_config.sh staging "your_private_key"
+sudo ./init_mi_config.sh staging "your_private_key"
 ```
 
 This will:
@@ -73,7 +73,7 @@ This will:
 For new developers who have received the private key, you can quickly set up your environment with a single command:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/missioninbox/ops-config-manager/main/init_config.sh | sudo bash -s -- staging "your_private_key"
+curl -sSL https://raw.githubusercontent.com/MissionInbox/ops-config-manager/refs/heads/master/init_config.sh | sudo bash -s -- staging "your_private_key"
 ```
 
 Replace `staging` with the environment you need (`production`, etc.) and `"your_private_key"` with the actual private key you've received through secure channels.
