@@ -6,28 +6,25 @@
 
 set -e
 
-CONFIG_PARAMS_FILE="/opt/missioninbox/config_params"
-OUTPUT_FILE="/opt/missioninbox/environment.config"
-
-# Check if we have stored parameters
-if [ -f "$CONFIG_PARAMS_FILE" ]; then
-  echo "Loading stored configuration parameters..."
-  source "$CONFIG_PARAMS_FILE"
+# If we have parameters, use them 
+if [ "$#" -eq 2 ]; then
+  ENV="$1"
+  PRIVATE_KEY="$2"
 else
-  # If no stored parameters, we need command line arguments
-  if [ "$#" -lt 2 ]; then
+  # Check if we have stored parameters
+  CONFIG_PARAMS_FILE="/opt/missioninbox/config_params"
+  if [ -f "$CONFIG_PARAMS_FILE" ]; then
+    echo "Loading stored configuration parameters..."
+    source "$CONFIG_PARAMS_FILE"
+    ENV="$ENVIRONMENT"
+  else
     echo "Error: No stored parameters found."
     echo "Usage: $0 [environment] [private_key]"
     echo "Example: $0 staging \"some_private_key\""
     exit 1
   fi
-
-  ENV="$1"
-  PRIVATE_KEY="$2"
 fi
 
-ENV="$1"
-PRIVATE_KEY="$2"
 API_DOMAIN="https://admin-api.missioninbox.com"
 CONFIG_URL="${API_DOMAIN}/ops/${ENV}.config"
 OUTPUT_FILE="/opt/missioninbox/environment.config"
@@ -38,7 +35,7 @@ CONFIG_PARAMS_FILE="/opt/missioninbox/config_params"
 check_root() {
   if [ "$(id -u)" != "0" ]; then
     echo "This script must be run as root or with sudo to install to system directories"
-    echo "Try: sudo $0 $*"
+    echo "Try: sudo $0 $@"
     exit 1
   fi
 }
@@ -106,17 +103,29 @@ fi
 
 echo "✅ Configuration initialized successfully at $OUTPUT_FILE"
 
-# Store this script for future use by other repositories
-if [ "$SCRIPT_DESTINATION" != "$0" ]; then
+# Only store the script if this is the initial installation
+if [ "$#" -eq 2 ]; then
+  # Get the actual script location - handle both direct execution and curl piping
+  SCRIPT_PATH="$0"
+  if [ "$SCRIPT_PATH" = "bash" ] || [ "$(basename $SCRIPT_PATH)" = "bash" ]; then
+    # We're being piped via curl, create a temporary copy of ourselves
+    SELF_CONTENT=$(cat)
+    TEMP_SCRIPT="$TEMP_DIR/temp_script.sh"
+    echo "$SELF_CONTENT" > "$TEMP_SCRIPT"
+    chmod +x "$TEMP_SCRIPT"
+    SCRIPT_PATH="$TEMP_SCRIPT"
+  fi
+
   echo "Installing script to $SCRIPT_DESTINATION for future use..."
   
   # Check if we need root permissions
   if [[ "$SCRIPT_DESTINATION" =~ ^/usr/bin/ ]]; then
-    check_root
+    # We're already running as root if we got here via curl | sudo bash
+    true
   fi
   
   # Copy this script to the destination
-  cp "$0" "$SCRIPT_DESTINATION"
+  cp "$SCRIPT_PATH" "$SCRIPT_DESTINATION"
   chmod +x "$SCRIPT_DESTINATION"
   
   # Store environment and private key for future use
