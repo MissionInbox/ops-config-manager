@@ -10,6 +10,17 @@ This tool allows you to:
 2. Upload the encrypted configurations to a server
 3. Securely retrieve and decrypt configurations when needed
 
+## Dependencies
+
+This tool depends on:
+
+- `openssl` - For encryption/decryption (usually pre-installed)
+- `curl` - For downloading configurations (usually pre-installed)
+- `base64` - For encoding/decoding (usually pre-installed)
+- `jq` - For JSON parsing (will be auto-installed if missing)
+
+The script will automatically check for and install `jq` if it's not present.
+
 ## Setup for Configuration Management
 
 Copy the example environment file to create your own:

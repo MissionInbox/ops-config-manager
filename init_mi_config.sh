@@ -103,29 +103,31 @@ fi
 
 echo "✅ Configuration initialized successfully at $OUTPUT_FILE"
 
-# Extract repo_private_key if present in config
+# Extract repo_private_key if present in config using jq
 REPO_KEY_PATH="/opt/missioninbox/repo.key"
 echo "Checking for repository private key in config..."
 
-if grep -q "repo_private_key" "$OUTPUT_FILE"; then
+# Check if jq is installed
+if ! command -v jq &> /dev/null; then
+  echo "jq not found. Installing jq..."
+  apt-get update -qq && apt-get install -y jq
+fi
+
+# Extract the base64 encoded private key using jq
+REPO_KEY_BASE64=$(jq -r '.repo_private_key // empty' "$OUTPUT_FILE")
+
+if [ -n "$REPO_KEY_BASE64" ]; then
   echo "Found repo_private_key in config, extracting..."
   
-  # Extract the base64 encoded private key
-  REPO_KEY_BASE64=$(grep -o '"repo_private_key"[[:space:]]*:[[:space:]]*"[^"]*"' "$OUTPUT_FILE" | cut -d'"' -f4)
+  # Decode the base64 key
+  echo "$REPO_KEY_BASE64" | base64 -d > "$REPO_KEY_PATH"
   
-  if [ -n "$REPO_KEY_BASE64" ]; then
-    # Decode the base64 key
-    echo "$REPO_KEY_BASE64" | base64 -d > "$REPO_KEY_PATH"
-    
-    # Set secure permissions for SSH key
-    chmod 600 "$REPO_KEY_PATH"
-    
-    echo "✅ Repository private key saved to $REPO_KEY_PATH with secure permissions"
-  else
-    echo "⚠️ repo_private_key found but appears to be empty"
-  fi
+  # Set secure permissions for SSH key
+  chmod 600 "$REPO_KEY_PATH"
+  
+  echo "✅ Repository private key saved to $REPO_KEY_PATH with secure permissions"
 else
-  echo "No repo_private_key found in config"
+  echo "No repo_private_key found in config or it is empty"
 fi
 
 # Only store the script if this is the initial installation
