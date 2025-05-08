@@ -13,10 +13,6 @@ if [ "$#" -lt 1 ]; then
   exit 1
 fi
 
-ENV="$1"
-CONFIG_FILE="configs/${ENV}.config"
-REMOTE_PATH="/var/www/ops/${ENV}.config"
-
 # Load variables from .env file
 if [ -f .env ]; then
   export $(grep -v '^#' .env | xargs)
@@ -24,6 +20,10 @@ else
   echo "Error: .env file not found"
   exit 1
 fi
+
+ENV="$1"
+CONFIG_FILE="${CONFIGS_ROOT}/${ENV}.config"
+REMOTE_PATH="/var/www/ops/${ENV}.config"
 
 # Check if required environment variables are set
 if [ -z "$PRIVATE_KEY" ]; then
