@@ -18,6 +18,17 @@ PRIVATE_KEY="$2"
 API_DOMAIN="https://admin-api.missioninbox.com"
 CONFIG_URL="${API_DOMAIN}/ops/${ENV}.config"
 OUTPUT_FILE="/opt/missioninbox/environment.config"
+SCRIPT_DESTINATION="/usr/bin/init_mi_config.sh"
+CONFIG_PARAMS_FILE="/opt/missioninbox/config_params"
+
+# Function to check if script is run with sudo/root
+check_root() {
+  if [ "$(id -u)" != "0" ]; then
+    echo "This script must be run as root or with sudo to install to system directories"
+    echo "Try: sudo $0 $*"
+    exit 1
+  fi
+}
 
 # Create output directory if it doesn't exist
 mkdir -p "$(dirname "$OUTPUT_FILE")" 2>/dev/null || true
@@ -81,3 +92,32 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "✅ Configuration initialized successfully at $OUTPUT_FILE"
+
+# Store this script for future use by other repositories
+if [ "$SCRIPT_DESTINATION" != "$0" ]; then
+  echo "Installing script to $SCRIPT_DESTINATION for future use..."
+  
+  # Check if we need root permissions
+  if [[ "$SCRIPT_DESTINATION" =~ ^/usr/bin/ ]]; then
+    check_root
+  fi
+  
+  # Copy this script to the destination
+  cp "$0" "$SCRIPT_DESTINATION"
+  chmod +x "$SCRIPT_DESTINATION"
+  
+  # Store environment and private key for future use
+  echo "Storing configuration parameters..."
+  mkdir -p "$(dirname "$CONFIG_PARAMS_FILE")" 2>/dev/null || true
+  cat > "$CONFIG_PARAMS_FILE" << EOF
+ENVIRONMENT=$ENV
+PRIVATE_KEY=$PRIVATE_KEY
+EOF
+  chmod 600 "$CONFIG_PARAMS_FILE"  # Restrict permissions - only owner can read/write
+  
+  echo "✅ Script installed at $SCRIPT_DESTINATION"
+  echo "✅ Configuration parameters stored at $CONFIG_PARAMS_FILE"
+  echo ""
+  echo "Other repositories can now run this command to update configuration:"
+  echo "  $SCRIPT_DESTINATION"
+fi

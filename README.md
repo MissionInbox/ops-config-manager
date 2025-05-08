@@ -48,33 +48,70 @@ The script automatically detects which environment's configuration to update bas
 
 ### Initializing Configuration
 
-To fetch and decrypt a configuration file on a new server:
+The system uses two scripts with different purposes:
+
+1. `init_config.sh` - Initial setup with parameters (used once)
+2. `init_mi_config.sh` - Parameter-less updater (used by other repositories)
+
+#### First-Time Setup
+
+To perform the initial configuration on a new server:
 
 ```bash
-./init_config.sh staging "your_private_key"
+sudo ./init_config.sh staging "your_private_key"
 ```
 
 This will:
 1. Fetch the encrypted configuration from `https://admin-api.missioninbox.com/ops/staging.config`
 2. Decrypt it using the provided private key
 3. Store the decrypted configuration at `/opt/missioninbox/environment.config`
+4. Install `init_mi_config.sh` to `/usr/bin/` for future use
+5. Store the environment and private key securely for automatic updates
 
-### Quick Setup for New Developers
+#### Quick Setup for New Developers
 
 For new developers who have received the private key, you can quickly set up your environment with a single command:
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/missioninbox/ops-config-manager/main/init_config.sh | bash -s -- staging "your_private_key"
+curl -sSL https://raw.githubusercontent.com/missioninbox/ops-config-manager/main/init_config.sh | sudo bash -s -- staging "your_private_key"
 ```
 
 Replace `staging` with the environment you need (`production`, etc.) and `"your_private_key"` with the actual private key you've received through secure channels.
 
-This command will:
-1. Download the initialization script directly from GitHub
-2. Execute it with your environment and private key
-3. Set up your environment configuration at `/opt/missioninbox/environment.config`
+This single command performs the complete setup process described above.
 
-Note: You may need to use `sudo` if you don't have write access to the `/opt/missioninbox` directory.
+### Integration with Other Repositories
+
+Once the initial setup is complete, other repositories can refresh the configuration by simply running:
+
+```bash
+/usr/bin/init_mi_config.sh
+```
+
+This script will automatically:
+1. Read the stored environment and private key
+2. Download the latest configuration
+3. Update `/opt/missioninbox/environment.config` with the latest values
+
+No additional arguments are needed as the script uses the stored parameters from the initial setup.
+
+#### Example Integration
+
+Add this to the beginning of your scripts in other repositories:
+
+```bash
+#!/bin/bash
+# Check if the configuration updater is available
+if [ -x "/usr/bin/init_mi_config.sh" ]; then
+  echo "Refreshing configuration..."
+  /usr/bin/init_mi_config.sh
+else
+  echo "Warning: Configuration updater not installed"
+  echo "Run the ops-config-manager setup first"
+fi
+
+# Continue with your script...
+```
 
 ## Configuration Files
 
