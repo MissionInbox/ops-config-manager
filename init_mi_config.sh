@@ -153,6 +153,7 @@ if [ "$PRIVATE_KEYS_COUNT" -gt 0 ]; then
       
       # Decode the base64 key and save to file
       echo "$KEY_CONTENT" | base64 -d > "$KEY_PATH"
+      echo "" >> "$KEY_PATH"
       
       # Set secure permissions for SSH key
       chmod 600 "$KEY_PATH"
