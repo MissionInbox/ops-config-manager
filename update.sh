@@ -14,7 +14,7 @@ if [ "$#" -lt 1 ]; then
 fi
 
 ENV="$1"
-CONFIG_FILE="${ENV}.config"
+CONFIG_FILE="configs/${ENV}.config"
 REMOTE_PATH="/var/www/ops/${ENV}.config"
 
 # Load variables from .env file
