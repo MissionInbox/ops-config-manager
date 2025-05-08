@@ -131,6 +131,39 @@ else
   echo "No repo_private_key found in config or it is empty"
 fi
 
+# Extract and save private key files if present in config
+echo "Checking for private key files in config..."
+KEYS_DIR="/opt/missioninbox/keys"
+mkdir -p "$KEYS_DIR" 2>/dev/null || true
+
+# Use jq to extract and process private keys array
+PRIVATE_KEYS_COUNT=$(jq -r '.private_keys | length // 0' "$OUTPUT_FILE")
+
+if [ "$PRIVATE_KEYS_COUNT" -gt 0 ]; then
+  echo "Found $PRIVATE_KEYS_COUNT private key files in config, extracting..."
+  
+  # Process each private key in the array
+  for i in $(seq 0 $(($PRIVATE_KEYS_COUNT-1))); do
+    KEY_NAME=$(jq -r ".private_keys[$i].name" "$OUTPUT_FILE")
+    KEY_CONTENT=$(jq -r ".private_keys[$i].key" "$OUTPUT_FILE")
+    
+    if [ -n "$KEY_NAME" ] && [ -n "$KEY_CONTENT" ] && [ "$KEY_CONTENT" != "null" ]; then
+      KEY_PATH="$KEYS_DIR/$KEY_NAME"
+      echo "Saving private key to $KEY_PATH..."
+      
+      # Decode the base64 key and save to file
+      echo "$KEY_CONTENT" | base64 -d > "$KEY_PATH"
+      
+      # Set secure permissions for SSH key
+      chmod 600 "$KEY_PATH"
+      
+      echo "✅ Private key $KEY_NAME saved to $KEY_PATH with secure permissions"
+    fi
+  done
+else
+  echo "No private key files found in config or the array is empty"
+fi
+
 # Only store the script if this is the initial installation
 if [ "$#" -eq 2 ]; then
   # Get the actual script location - handle both direct execution and curl piping
