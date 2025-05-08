@@ -22,7 +22,7 @@ else
 fi
 
 ENV="$1"
-CONFIG_FILE="${CONFIGS_ROOT}/${ENV}.config"
+CONFIG_FILE="${CONFIGS_ROOT}/${ENV}-environment.config"
 REMOTE_PATH="/var/www/ops/${ENV}.config"
 
 # Check if required environment variables are set
