@@ -113,24 +113,6 @@ if ! command -v jq &> /dev/null; then
   apt-get update -qq && apt-get install -y jq
 fi
 
-# Extract the base64 encoded private key using jq
-REPO_KEY_BASE64=$(jq -r '.repo_private_key // empty' "$OUTPUT_FILE")
-
-if [ -n "$REPO_KEY_BASE64" ]; then
-  echo "Found repo_private_key in config, extracting..."
-  
-  # Decode the base64 key and ensure it has a blank line at the end
-  echo "$REPO_KEY_BASE64" | base64 -d > "$REPO_KEY_PATH"
-  echo "" >> "$REPO_KEY_PATH"  # Add blank line at the end
-  
-  # Set secure permissions for SSH key
-  chmod 600 "$REPO_KEY_PATH"
-  
-  echo "✅ Repository private key saved to $REPO_KEY_PATH with secure permissions"
-else
-  echo "No repo_private_key found in config or it is empty"
-fi
-
 # Extract and save private key files if present in config
 echo "Checking for private key files in config..."
 KEYS_DIR="/opt/missioninbox/keys"
